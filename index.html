@@ -1,218 +1,340 @@
-
-<!DOCTYPE HTML>
-<html lang="" >
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Introduction · GitBook</title>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="description" content="">
-        <meta name="generator" content="GitBook 3.2.3">
-        
-        
-        
-    
-    <link rel="stylesheet" href="gitbook/style.css">
-
-    
-            
-                
-                <link rel="stylesheet" href="gitbook/gitbook-plugin-highlight/website.css">
-                
-            
-                
-                <link rel="stylesheet" href="gitbook/gitbook-plugin-search/search.css">
-                
-            
-                
-                <link rel="stylesheet" href="gitbook/gitbook-plugin-fontsettings/website.css">
-                
-            
-        
-
-    
-
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-
-        
-    
-    
-    <meta name="HandheldFriendly" content="true"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="gitbook/images/apple-touch-icon-precomposed-152.png">
-    <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
-
-    
-    
-
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>抽卡模拟器</title>
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <style type="text/css">
+            input{
+                width: 400px;
+                height: 30px;
+                line-height: 25px;
+                padding: 5px 10px;
+                border-radius: 5px;
+                border: 2px solid;
+                font-size: 16px;
+            }
+            #msg{
+                width: 300px;
+            }
+            button{
+                width: 80px;
+                height: 44px;
+                padding: 5px 20px;
+                border-radius: 5px;
+            }
+            #主页{
+                position:fixed;
+                top: 10px;
+                right: 50px;
+                text-align: center;
+            }
+            #msgList{
+                position:fixed;
+                left: 50px;
+                overflow: auto;
+                height: 100vh;
+                padding-right: 50px;
+            }
+            p.金色{
+                color: gold;
+                font-weight: bold;
+            }
+            p.紫色{
+                color:blueviolet;
+                font-weight: bold;
+            }
+            p.蓝色{
+                color:dodgerblue;
+            }
+            a{
+                text-decoration: none;
+                color: gold;
+            }
+        </style>
     </head>
+
     <body>
-        
-<div class="book">
-    <div class="book-summary">
-        
+		<div id="主页">
+            崩坏3抽卡模拟器<br/><br/>
+			<p>*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-**-*-*-*-*-*-*-*</p>
+			<p>欢迎使用崩坏3抽卡模拟器——装备池<a target="_blank" href="抽角色.html">（角色池）</a></p>
+			<p>四星武器基础概率：7.677%，其中UP武器为2.495%*2，其他四星武器为0.537%*5</p>
+			<p>四星圣痕基础概率：7.677%，其中UP圣痕为1.279*3%，其他四星圣痕为0.320%*12</p>
+			<p>UP装备保底：50抽。每50次必定获得一件未获得的UP装备（至多200次必定获得全部UP装备）</p>
+			<p>四星装备保底：10抽。十次精准必出四星装备。</p>
+			<p>*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-**-*-*-*-*-*-*-*</p>
+            <p><input type="text" id="number" placeholder="抽卡次数: 0退出，1单发，10十连，-1查询，-2重置"></p>
+            <hr>
+		</div>
+        <div id="msgList">
+			<p>********************************************************************************</p>
+			<p>请输入你抽卡的次数:（0退出，1单发，10十连，-1查询，-2重置数据）)</p>
+			<p>********************************************************************************</p>
+		</div>
+
+        <script type="text/javascript">
+            // 补给池
+            const UP武器池 = ["往事的华章","往事的幻梦"];
+            const UP圣痕池 = ["亨德尔上","亨德尔中","亨德尔下"];
+            const 四星武器池 = ["空无之钥","碎骨兔19C","无存之钥","安息鸢尾","星枪.主序星"];
+            const 四星圣痕池 = ["阿伏伽德罗上","阿伏伽德罗中","阿伏伽德罗下","亚丝拉琪上","亚丝拉琪中","亚丝拉琪下","林奈上","林奈中","林奈下","帕格尼尼上","帕格尼尼中","帕格尼尼下"];
+            const 三星武器池 = new Array(23);
+            const 三星圣痕池 = new Array(36);
+            const 其他材料池 = ["进化材料","经验材料"];
+            const 金币材料池 = "金币材料";
+            // 总概率
+            const UP四星武器概率=Math.round((2.495*UP武器池.length)*1000)/1000,UP四星圣痕概率=Math.round((1.279*UP圣痕池.length)*1000)/1000,
+            非UP四星武器概率=Math.round((0.537*四星武器池.length)*1000)/1000,非UP四星圣痕概率=Math.round((0.320*四星圣痕池.length)*1000)/1000,
+            四星武器概率=7.677,四星圣痕概率=7.677,三星武器概率=10.852,三星圣痕概率=32.556,金币材料概率=8.248;
+
+            let UP保底 = 0; // 没有抽到up装备的次数（保底50，默认为零）
+            let 十连保底 = 0; // 十连没有抽到四星装备的次数，默认为零，十次精准必出4星装备
+            // 用来保存抽到的UP装备和非UP四星装备
+            let UP结果 = [],非UP结果 = [];
+            // 抽到的UP数量；抽到的非UP数量；抽卡的次数；每次输入的抽卡的次数；
+            let UP数量 = 0,非UP数量 = 0,抽卡总数 = 0,x = 0;
+            let 是否抽出全部UP装备 = false;
+            // 展示的信息列表
+            let msgList = document.getElementById("msgList");
+
+            const arr1是否包含arr2 = (arr1, arr2) => arr2.every((val) => arr1.includes(val));
+
+            // 加载菜单
+            function 菜单() {
+                var main = "<p>********************************************************************************</p>";
+                if(抽卡总数 > 0){
+                    main += "<p>抽卡总数："+抽卡总数+"&emsp;&emsp;非UP四星数量："+非UP数量+"&emsp;&emsp;UP数量："+UP数量+"</p>";
+                    main += "<p>还剩 "+ (50-UP保底) +" 次，必出UP装备；还剩 "+ (10-十连保底) +" 次，必出一件四星装备。</p>";
+                    if(arr1是否包含arr2(UP结果,UP武器池) && arr1是否包含arr2(UP结果,UP圣痕池)){
+                        是否抽出全部UP装备 = true;
+                        main += "<p style='color: red;'>你已抽出全部UP装备，还要继续吗？</p>";
+                    }
+                }
+                main += "<p>请输入你抽卡的次数:（0退出，1单发，10十连，-1查询，-2重置数据）)</p>";
+                main += "<p>********************************************************************************</p>";
+                msgList.innerHTML += main;
+            }
+			
+			// 输入框enter事件
+			$("input").keydown(function (event) {
+				if (event.keyCode == 13) { // 输入框按下enter键后，获取它的值
+					x = document.getElementById("number").value;
+					if(x == 0){
+						return;
+					}
+					抽(x);
+				}
+			});
+		
+            // 开始抽卡
+            function 抽(x) {
+                if (x == -1) {
+                    查询();// -1查询
+                } else if (x == -2) {
+                    重置();// -2重置数据
+                } else if (x == 1 || x == 10) { // 抽卡概率主体部分
+                    for (var i = 0; i < x; i++) {
+                        if (UP保底 >= 49){ // 每50次没有出UP的话，必出保底（因为i是从0开始的，所以是49和9）
+                            UP装备保底(); // 重置UP保底、十连保底
+                        }else if(十连保底 >= 9){
+                            十连装备保底();
+                        }else {
+                            if(概率(UP四星武器概率)){
+                                四星武器(true);
+                            }else if(概率(UP四星圣痕概率)){
+                                四星圣痕(true);
+                            }else if(概率(非UP四星武器概率)){
+                                四星武器(false);
+                            }else if(概率(非UP四星圣痕概率)){
+                                四星圣痕(false);
+                            }else {
+                                if (概率(三星武器概率)){
+                                    三星武器();
+                                }else if (概率(三星圣痕概率)){
+                                    三星圣痕();
+                                }else if (概率(金币材料概率)){
+                                    金币材料();
+                                }else{
+                                    其他材料();
+                                }
+                                UP保底++;
+                                十连保底++;
+                            }
+                        }
+                        抽卡总数++;
+                    }
+                } else if (x > 0){
+                    msgList.innerHTML += "<p>输入错误请重新输入！</p>";
+                }
+                菜单();
+            }
+
+            // 查询抽到的四星装备
+            function 查询() {
+                var str = "";
+                if (UP数量 == 0 && 非UP数量 == 0) {
+                    str += "<p>还未抽到任何四星装备，继续加油，冲冲冲！</p>";
+                } else {
+                    str = "<p>抽到的UP装备如下：</p><p class='金色'>";
+                    for (var i = 0; i < UP数量; i++) {
+                        str += UP结果[i]+"&emsp;&emsp;";
+                        if (i!=0 && i%5==0) str += "</p><p class='金色'>";
+                    }
+                    str += "</p><p>抽到的非UP四星装备如下：</p><p class='紫色'>";
+                    for (var i = 0; i < 非UP数量; i++) {
+                        str += 非UP结果[i]+"&emsp;&emsp;";
+                        if (i!=0 && i%5==0) str += "</p><p class='紫色'>";
+                    }
+                }
+                msgList.innerHTML += str;
+            }
+
+            // 重置数据
+            function 重置(){
+                UP数量 = 0;
+                非UP数量 = 0;
+                抽卡总数 = 0;
+                UP保底 = 0;
+                十连保底 = 0;
+                是否抽出全部UP装备 = false;
+                x = 0;
+                UP结果 = new Array(1000);
+                非UP结果 = new Array(1000);
+            }
             
-<div id="book-search-input" role="search">
-    <input type="text" placeholder="Type to search" />
-</div>
+            // 一个概率函数
+            function 概率(x) {
+                x = x * 1000;
+                var y = Math.random()*100000;
+                if (y < x) return true;
+                else return false;
+            }
 
-            
-                <nav role="navigation">
-                
+            // 保底五十，必出一件没有出过的UP武器或圣痕
+            function UP装备保底(){
+                let 必出UP = [];
+                while(true){
+                    if (概率(UP四星武器概率)){
+                        // 将UP武器和UP圣痕分别与已出的UP结果对比，找出UP结果没有的武器或圣痕，添加到必出UP中
+                        for (const i in UP武器池) {
+                            if (!UP结果.includes(UP武器池[i])){
+                                必出UP.push(UP武器池[i]);
+                            }
+                        }
+                        if(必出UP.length>0){
+                            var y = Math.floor(Math.random()*必出UP.length);
+                            msgList.innerHTML += "<p class='金色'>UP武器 ********  "+必出UP[y]+"</p>";
+                            UP结果[UP数量] = 必出UP[y];
+                            UP数量++;
+                            UP保底 = 0;
+                            十连保底 = 0;
+                        }else { // 如果已经抽出了全部UP装备
+                            四星武器(true);
+                        }
+                        break;
+                    }else if (概率(UP四星圣痕概率)){
+                        for (const i in UP圣痕池) {
+                            if (!UP结果.includes(UP圣痕池[i])){
+                                必出UP.push(UP圣痕池[i]);
+                            }
+                        }
+                        if(必出UP.length>0){
+                            var y = Math.floor(Math.random()*必出UP.length);
+                            msgList.innerHTML += "<p class='金色'>UP圣痕 ********  "+必出UP[y]+"</p>";
+                            UP结果[UP数量] = 必出UP[y];
+                            UP数量++;
+                            UP保底 = 0;
+                            十连保底 = 0;
+                        }else { // 如果已经抽出了全部UP装备
+                            四星圣痕(true);
+                        }
+                        break;
+                    }
+                }
+            }
 
+            // 十连必定出一件四星装备
+            function 十连装备保底(){
+                // 循环，一直到满足武器或圣痕的概率时停止。
+                while (true){
+                    if(概率(UP四星武器概率)){
+                        四星武器(true);
+                        break;
+                    }else if(概率(UP四星圣痕概率)){
+                        四星圣痕(true);
+                        break;
+                    }else if(概率(非UP四星武器概率)){
+                        四星武器(false);
+                        break;
+                    }else if(概率(非UP四星圣痕概率)){
+                        四星圣痕(false);
+                        break;
+                    }
+                }
+            }
 
-<ul class="summary">
-    
-    
+            // 四星武器，包括UP武器和非UP武器
+            function 四星武器(是否出UP){
+                // UP武器的基本概率和非UP四星武器总基本概率是一样的，所以各有50概率是出UP还是非UP武器
+                if (是否出UP){
+                    var y = Math.floor(Math.random()*UP武器池.length);
+                    msgList.innerHTML += "<p class='金色'>UP武器 ********  "+UP武器池[y]+"</p>";
+                    if (!UP结果.includes(UP武器池[y])) UP保底 = 0; // 如果抽出的UP在UP结果中不存在，则重置50保底
+                    if (是否抽出全部UP装备)  UP保底 = 0; // 如果已经出了全部装备，再出UP，则重置50保底
+                    UP结果[UP数量] = UP武器池[y];
+                    UP数量++;
+                    十连保底 = 0;//重置十连保底
+                }else {
+                    var y = Math.floor(Math.random()*四星武器池.length);
+                    msgList.innerHTML += "<p class='紫色'>四星武器 ******  "+四星武器池[y]+"</p>";
+                    非UP结果[非UP数量] = 四星武器池[y];
+                    非UP数量++;
+                    UP保底++;
+                }
+            }
 
-    
+            // 四星圣痕，包括UP圣痕和非UP圣痕
+            function 四星圣痕(是否出UP){
+                // UP圣痕的基本概率和四星圣痕总基本概率是一样的，所以各有50概率是出UP还是非UP圣痕
+                if (是否出UP){
+                    var y = Math.floor(Math.random()*UP圣痕池.length);
+                    msgList.innerHTML += "<p class='金色'>UP圣痕 ********  "+UP圣痕池[y]+"</p>";
+                    if (!UP结果.includes(UP圣痕池[y])) UP保底 = 0; // 如果抽出的UP在UP结果中不存在，则重置50保底
+                    if (是否抽出全部UP装备)  UP保底 = 0; // 如果已经出了全部装备，再出UP，则重置50保底
+                    UP结果[UP数量] = UP圣痕池[y];
+                    UP数量++;
+                    十连保底 = 0;//重置十连保底
+                }else {
+                    var y = Math.floor(Math.random()*四星圣痕池.length);
+                    msgList.innerHTML += "<p class='紫色'>四星圣痕 ******  "+四星圣痕池[y]+"</p>";
+                    非UP结果[非UP数量] = 四星圣痕池[y];
+                    非UP数量++;
+                    UP保底++;
+                    十连保底 = 0;//重置十连保底
+                }
+            }
 
-    
-        
-        
-    
-        <li class="chapter active" data-level="1.1" data-path="./">
-            
-                <a href="./">
-            
-                    
-                    Introduction
-            
-                </a>
-            
+            function 三星武器(){
+                var y = Math.floor(Math.random()*三星武器池.length);
+                msgList.innerHTML += "<p class='蓝色'>三星武器 ***  "+(y+1)+"</p>";
+            }
 
-            
-        </li>
-    
+            function 三星圣痕(){
+                var y = Math.floor(Math.random()*三星圣痕池.length);
+                msgList.innerHTML += "<p class='蓝色'>三星圣痕 ***  "+(y+1)+"</p>";
+            }
 
-    
+            function 其他材料(){
+                var y = Math.floor(Math.random()*其他材料池.length);
+                msgList.innerHTML += "<p>其他材料 ***  "+其他材料池[y]+"</p>";
+            }
 
-    <li class="divider"></li>
-
-    <li>
-        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
-            Published with GitBook
-        </a>
-    </li>
-</ul>
-
-
-                </nav>
-            
-        
-    </div>
-
-    <div class="book-body">
-        
-            <div class="body-inner">
-                
-                    
-
-<div class="book-header" role="navigation">
-    
-
-    <!-- Title -->
-    <h1>
-        <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >Introduction</a>
-    </h1>
-</div>
-
-
-
-
-                    <div class="page-wrapper" tabindex="-1" role="main">
-                        <div class="page-inner">
-                            
-<div id="book-search-results">
-    <div class="search-noresults">
-    
-                                <section class="normal markdown-section">
-                                
-                                <h1 id="introduction">Introduction</h1>
-
-                                
-                                </section>
-                            
-    </div>
-    <div class="search-results">
-        <div class="has-results">
-            
-            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
-            <ul class="search-results-list"></ul>
-            
-        </div>
-        <div class="no-results">
-            
-            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
-            
-        </div>
-    </div>
-</div>
-
-                        </div>
-                    </div>
-                
-            </div>
-
-            
-                
-                
-            
-        
-    </div>
-
-    <script>
-        var gitbook = gitbook || [];
-        gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"README.md","mtime":"2025-07-02T07:30:58.101Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-07-02T07:31:02.020Z"},"basePath":".","book":{"language":""}});
-        });
-    </script>
-</div>
-
-        
-    <script src="gitbook/gitbook.js"></script>
-    <script src="gitbook/theme.js"></script>
-    
-        
-        <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
-        
-    
-        
-        <script src="gitbook/gitbook-plugin-search/search.js"></script>
-        
-    
-        
-        <script src="gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
-        
-    
-        
-        <script src="gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
-        
-    
-        
-        <script src="gitbook/gitbook-plugin-sharing/buttons.js"></script>
-        
-    
-        
-        <script src="gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
-        
-    
-
+            function 金币材料(){
+                msgList.innerHTML += "<p>金币材料 ***  "+金币材料池+"</p>";
+            }
+        </script>
     </body>
 </html>
-
